@@ -1,3 +1,17 @@
+#The script is designed to rebuild Spyder CDR files in more readable way and save them as a separate files,
+#then the new files are searched through.
+
+# To use the program for searching phone numbers in Spyder, you should do the following:
+# 1. put the script in folder with CDRs .dat files 
+# 2. create file number_list.txt with phone number you would like to serach for, please note that you should print one phone number
+# per line and do not add whitesapces or other symbols to numbers
+# 3. Run the script
+# As a result you will have in the working folder:
+# old CDR .dat files, rebuilt CDR .txt files, script file spider_reader.py,  number_list.txt, found_results.txt
+# If you want to start new search with new files, you'll better delete found_results.txt and rebuilt CDR .txt files
+# later I'll consider opportunity do not rebuild .dat files if it was done diring previuos seach, but not now unfortunately =(
+
+
 import time
 import os
 import re
@@ -17,7 +31,7 @@ def rebuild_spider_file_line(line):
             if element.startswith('15') and len(element) == 10:
                 rebuilt_line = ' '.join([rebuilt_line, convert_posix_time_to_standard(element)])
             elif len(element) > 20:
-                pass # do not need to have such elements in rebuilt)line
+                pass # do not need to have such elements in rebuilt line
             else:
                 rebuilt_line = ' '.join([rebuilt_line, element])
     return rebuilt_line
