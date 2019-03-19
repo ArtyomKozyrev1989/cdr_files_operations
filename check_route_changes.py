@@ -18,7 +18,7 @@ def convert_table_to_lines(table):
         line = ""
         for column_index in range(len(table.columns)-3):
             if line is not "":
-                line = '***'.join([line, str(table[table.columns[column_index]][table_line])])
+                line = '*'.join([line, str(table[table.columns[column_index]][table_line])])
             else:
                 line = str((table[table.columns[column_index]][table_line]))
         result.append(line)
@@ -29,9 +29,6 @@ def compare_two_line_massives(massive1, massive2):
     result = []
     for element in massive1:
         if element not in massive2:
-            result.append(element)
-    for element in massive2:
-        if element not in massive1:
             result.append(element)
     return result
 
