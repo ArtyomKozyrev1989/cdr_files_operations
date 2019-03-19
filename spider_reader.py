@@ -9,7 +9,6 @@
 # As a result you will have in the working folder:
 # old CDR .dat files, rebuilt CDR .txt files, script file spider_reader.py,  number_list.txt, found_results.txt
 # If you want to start new search with new files, you'll better delete found_results.txt and rebuilt CDR .txt files
-# later I'll consider opportunity do not rebuild .dat files if it was done diring previuos seach, but not now unfortunately =(
 
 
 import time
