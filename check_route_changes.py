@@ -1,3 +1,9 @@
+# The script is  used to search for route changes in EPM INT files from database
+# The option was made since database web interface is the 3rd party software
+# To use the program copy paste the file and EPM files in one folder
+# Then run the script
+# Then choose files to compare, first group of files is compared with the second group of files
+
 import pandas as pd
 import os
 import copy
