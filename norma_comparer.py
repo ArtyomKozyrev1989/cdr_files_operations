@@ -1,3 +1,13 @@
+# NOTE: you need pandas and xlrd
+
+# To use the program do the following
+# 1. Name uploaded from Norma database file norma
+# 2. Write phonenumber you gonna searching in number_list.txt files, ! one phonenumber per line
+# 3. Pur CDRs files, norma file, number_list.txt file and the script in one folder
+# 4. Run the script file
+# 5. The results will be in console window and in found_results.txt file
+
+
 import re
 import os
 import time
