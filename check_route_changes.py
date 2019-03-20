@@ -10,6 +10,13 @@ import os
 import copy
 import time
 import sys
+import datetime
+import re
+
+
+def get_yesterday_date():
+    yesterday = datetime.date.today() - datetime.timedelta(1)
+    return '{}.{}.{}'.format(yesterday.year, str(yesterday.month).rjust(2,'0'), str(yesterday.day).rjust(2,'0'))
 
 
 def convert_table_to_lines(table):
@@ -25,12 +32,100 @@ def convert_table_to_lines(table):
     return result
 
 
-def compare_two_line_massives(massive1, massive2):
+def convert_audit_table_to_lines(table):
     result = []
+    table = pd.read_excel(table)
+    interested_columns = (table.Username, table.Details)
+    for table_line in table.index:
+        line = ""
+        for column in interested_columns:
+            if line is not "":
+                line = '*'.join([line, str(column[table_line])])
+            else:
+                line = str(column[table_line])
+        result.append(line)
+    return result
+
+
+def compare_two_line_massives(massive1, massive2):
+    result_removed = []
+    result_added = []    
     for element in massive1:
         if element not in massive2:
-            result.append(element)
-    return result
+            result_removed.append(element)
+    for element in massive2:
+        if element not in massive1:
+            result_added.append(element)
+    return result_removed, result_added
+
+
+def compare_massives_write_tofile(result_removed, result_added):
+    print("The following destinations was removed: \n\n")
+    for i in result_removed:
+        print(i)
+    print("\nThe following destinations was added: \n\n")
+    for i in result_added:
+        print(i)
+    with open("file_difference.txt", 'a') as f:
+        f.write("The following destinations was removed: \n\n")
+        for i in result_removed:
+            f.write("{}\n".format(i))
+        f.write("\nThe following destinations was added: \n\n")
+        for i in result_added:
+            f.write("{}\n".format(i))
+
+
+def find_username_line(comp_line, audit_line):
+    comp_line_list = comp_line.split('*')
+    destination = comp_line_list[0]
+    product = comp_line_list[2]
+    mypattern = '.+{}.+{}'.format(product, destination)
+    if re.search(pattern=mypattern, string=audit_line):
+        return '*'.join([comp_line, audit_line.split('*')[0], get_yesterday_date()]) 
+    
+    
+def find_epm_audit_pairs(result_removed, result_added, audit_lines):
+    result_removed_with_user_full = []
+    for result in result_removed:
+        result_removed_with_user_local = []
+        for line in audit_lines:
+            userline = find_username_line(result, line)
+            if userline:
+                result_removed_with_user_local.append(userline)
+        if not result_removed_with_user_local:
+            result_removed_with_user_local.append(result + '*' + 'NoUserFound')
+        result_removed_with_user_full.append(set(result_removed_with_user_local))
+    result_added_with_user_full = []
+    for result in result_added:
+        result_added_with_user_local = []
+        for line in audit_lines:
+            userline = find_username_line(result, line)
+            if userline:
+                result_added_with_user_local.append(userline)
+        if not result_added_with_user_local:
+            result_added_with_user_local.append(result + '*' + 'NoUserFound')
+        result_added_with_user_full.append(set(result_removed_with_user_local))
+    return result_removed_with_user_full, result_added_with_user_full
+
+
+def find_epm_audit_pairs_write_tofile(resultuser_removed, resultuser_added):
+    print("\nThe following destinations USERNAME was removed: \n\n")
+    for elementset in resultuser_removed:
+        for element in elementset:
+            print(element)
+    print("\nThe following destinations USERNAME was added: \n\n")
+    for elementset in resultuser_added:
+        for element in elementset:
+            print(element)
+    with open("file_difference_user.txt", 'a') as f:
+        f.write("The following destinations USERNAME was removed: \n\n")
+        for elementset in resultuser_removed:
+            for element in elementset:
+                f.write("{}\n".format(element))
+        f.write("\nThe following destinations USERNAME was added: \n\n")
+        for elementset in resultuser_added:
+            for element in elementset:
+                f.write("{}\n".format(element))
 
 
 def get_epm_files_names():
@@ -41,6 +136,14 @@ def get_epm_files_names():
         if files[i].startswith('EPM_INT_'):
             epm_files_dict[str(i)] = files[i]
     return epm_files_dict
+
+
+def get_audit_file_name():
+    files = os.listdir()
+    for i in files:
+        if i.startswith('Audit'):
+            return i
+    return None
 
 
 def show_dict_of_epm_files(epm_files_dict):
@@ -81,7 +184,10 @@ def concatinate_epm_files(choice_list_strip, epm_files_dict):
 
 def main():
     epm_file_dict = get_epm_files_names()
-    if show_dict_of_epm_files(epm_file_dict):
+    audit_filename = get_audit_file_name()
+    epm_files_exist = show_dict_of_epm_files(epm_file_dict)
+    print(audit_filename)
+    if epm_files_exist and audit_filename is not None:
         while True:
             print("Please choose numbers for first group of files. Example: 1,26,44,55")
             group1 = input("First group: ")
@@ -100,17 +206,20 @@ def main():
             else:
                 print("You made incorrect files input")
         concatinated_group2 = concatinate_epm_files(choice_list_strip_group2, epm_file_dict)
-        file_differences = compare_two_line_massives(concatinated_group1, concatinated_group2)
-        print("The following difference between files were found: ")
-        for i in file_differences:
-            print(i)
-        with open("file_difference.txt", 'a') as f:
-            for i in file_differences:
-                f.write("{}\n".format(i))
+        result_removed, result_added = compare_two_line_massives(concatinated_group1, concatinated_group2)
+        compare_massives_write_tofile(result_removed, result_added)
+        audit_lines = convert_audit_table_to_lines(audit_filename)
+        resultuser_removed, resultuser_added = find_epm_audit_pairs(result_removed, result_added, audit_lines) 
+        find_epm_audit_pairs_write_tofile(resultuser_removed, resultuser_added)
+    elif epm_files_exist and audit_filename is None:
+        print("There is no audit file in the current folder")
+    elif not epm_files_exist and audit_filename is not None:
+        print("There are no EPM files in the current folder")
     else:
-        print("Incorrect use of the program, you need to put EPM files in the folder.")
-    
-
+        print("There is no audit file in the current folder")
+        print("There are no EPM files in the current folder")
+        
+        
 if __name__ == '__main__':
     try:
         main()
