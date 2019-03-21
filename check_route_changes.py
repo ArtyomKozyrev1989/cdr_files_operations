@@ -94,17 +94,23 @@ def find_epm_audit_pairs(result_removed, result_added, audit_lines):
                 result_removed_with_user_local.append(userline)
         if not result_removed_with_user_local:
             result_removed_with_user_local.append(result + '*' + 'NoUserFound')
+        if len(set(result_removed_with_user_local)) > 1:
+            result_removed_with_user_local = []
+            result_removed_with_user_local.append(result + '*' + 'SeveralUsersFound')
         result_removed_with_user_full.append(set(result_removed_with_user_local))
     result_added_with_user_full = []
     for result in result_added:
         result_added_with_user_local = []
         for line in audit_lines:
-            userline = find_username_line(result, line)
-            if userline:
-                result_added_with_user_local.append(userline)
+            userlineadd = find_username_line(result, line)
+            if userlineadd:
+                result_added_with_user_local.append(userlineadd)
         if not result_added_with_user_local:
             result_added_with_user_local.append(result + '*' + 'NoUserFound')
-        result_added_with_user_full.append(set(result_removed_with_user_local))
+        if len(set(result_added_with_user_local)) > 1:
+            result_added_with_user_local = []
+            result_added_with_user_local.append(result + '*' + 'SeveralUsersFound')
+        result_added_with_user_full.append(set(result_added_with_user_local))
     return result_removed_with_user_full, result_added_with_user_full
 
 
