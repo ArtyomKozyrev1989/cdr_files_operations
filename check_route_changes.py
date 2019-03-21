@@ -1,4 +1,4 @@
-# NOTE you need pandas and xlrd libraies
+# NOTE you need pandas, xlrd, openpyxl libraies
 # The script is  used to search for route changes in EPM INT files from database
 # The option was made since database web interface is the 3rd party software
 # To use the program copy paste the file and EPM files in one folder
@@ -12,6 +12,7 @@ import time
 import sys
 import datetime
 import re
+import openpyxl
 
 
 def get_yesterday_date():
@@ -45,6 +46,22 @@ def convert_audit_table_to_lines(table):
                 line = str(column[table_line])
         result.append(line)
     return result
+
+
+def write_audit_search_results_to_excel(resultuser_removed, resultuser_added):
+    resultuser_removed_for_excel = []
+    for dataset in resultuser_removed:
+        dataset = list(dataset)[0] + '*removed'
+        dataset = dataset.split('*')
+        resultuser_removed_for_excel.append(dataset)
+    resultuser_added_for_excel = []    
+    for dataset in resultuser_added:
+        dataset = list(dataset)[0] + '*added'
+        dataset = dataset.split('*')
+        resultuser_added_for_excel.append(dataset)
+    _columns=['Carrier', 'Destination', 'Product', 'User', 'Date', 'Action']   
+    df1 = pd.DataFrame(resultuser_removed_for_excel + resultuser_added_for_excel, columns=_columns)
+    df1.to_excel("file_difference_user.xlsx", index = False)
 
 
 def compare_two_line_massives(massive1, massive2):
@@ -93,10 +110,10 @@ def find_epm_audit_pairs(result_removed, result_added, audit_lines):
             if userline:
                 result_removed_with_user_local.append(userline)
         if not result_removed_with_user_local:
-            result_removed_with_user_local.append(result + '*' + 'NoUserFound')
+            result_removed_with_user_local.append(result + '*' + 'NoUserFound' + '*' + get_yesterday_date())
         if len(set(result_removed_with_user_local)) > 1:
             result_removed_with_user_local = []
-            result_removed_with_user_local.append(result + '*' + 'SeveralUsersFound')
+            result_removed_with_user_local.append(result + '*' + 'SeveralUsersFound' + '*' + get_yesterday_date())
         result_removed_with_user_full.append(set(result_removed_with_user_local))
     result_added_with_user_full = []
     for result in result_added:
@@ -106,10 +123,10 @@ def find_epm_audit_pairs(result_removed, result_added, audit_lines):
             if userlineadd:
                 result_added_with_user_local.append(userlineadd)
         if not result_added_with_user_local:
-            result_added_with_user_local.append(result + '*' + 'NoUserFound')
+            result_added_with_user_local.append(result + '*' + 'NoUserFound' + '*' + get_yesterday_date())
         if len(set(result_added_with_user_local)) > 1:
             result_added_with_user_local = []
-            result_added_with_user_local.append(result + '*' + 'SeveralUsersFound')
+            result_added_with_user_local.append(result + '*' + 'SeveralUsersFound' + '*' + get_yesterday_date())
         result_added_with_user_full.append(set(result_added_with_user_local))
     return result_removed_with_user_full, result_added_with_user_full
 
@@ -217,6 +234,7 @@ def main():
         audit_lines = convert_audit_table_to_lines(audit_filename)
         resultuser_removed, resultuser_added = find_epm_audit_pairs(result_removed, result_added, audit_lines) 
         find_epm_audit_pairs_write_tofile(resultuser_removed, resultuser_added)
+        write_audit_search_results_to_excel(resultuser_removed, resultuser_added)
     elif epm_files_exist and audit_filename is None:
         print("There is no audit file in the current folder")
     elif not epm_files_exist and audit_filename is not None:
