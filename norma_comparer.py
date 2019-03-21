@@ -41,11 +41,11 @@ def upload_number_list():
 
 def search_for_pattern(number):
     found_ip = []
-    our_files = ('x.py', "found_results.txt", "number_list.txt", 'norma.xls')
+    our_files = ('y.py', "found_results.txt", "number_list.txt", 'norma.xls')
     list_files = os.listdir()
     for file_name in list_files:
-        if file_name not in our_files:
-        #if file_name.startswith("MSK"):
+        #if file_name not in our_files:
+        if file_name.startswith("MSK"):
             with open(file=file_name, mode='r') as f:
                 text_of_file = f.read()
                 results = re.findall(pattern=f",,,,,.*{number}.*,", string=text_of_file)
@@ -86,6 +86,7 @@ def check_if_ip_in_norma(ip, trunk_names):
 
 
 def main():
+    t1 = int(round(time.time() * 1000))
     found_ip_lists = []
     found_ip_list = []
     if "norma.xls" not in os.listdir():
@@ -101,12 +102,16 @@ def main():
     for i in found_ip_lists:
         found_ip_list += i
     print(set(found_ip_list))
-    time.sleep(4)
     for ip in set(found_ip_list):
-        print(f"{check_if_ip_in_norma(ip, trunk_names)}\n")
+        x = check_if_ip_in_norma(ip, trunk_names)
+        print(f"{x}\n")
+        with open('found_results.txt', 'a') as f:
+            f.write(f"{x}\n")
     print("The program completed fine!")
     print("Take found_results.txt from the current folder")
     print("If you want to repeat search, remove found_results.txt")
+    t2 = int(round(time.time() * 1000))
+    print(f"Job is done within {t2 - t1} miliseconds")
     time.sleep(90)
     print("Bye!")
     time.sleep(1)
