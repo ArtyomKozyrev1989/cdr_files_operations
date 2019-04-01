@@ -30,7 +30,7 @@ def rebuild_spider_file_line(line):
             if element.startswith('15') and len(element) == 10:
                 rebuilt_line = ' '.join([rebuilt_line, convert_posix_time_to_standard(element)])
             elif len(element) > 20:
-                pass # do not need to have such elements in rebuilt line
+                pass # do not need to have such elements in rebuilt)line
             else:
                 rebuilt_line = ' '.join([rebuilt_line, element])
     return rebuilt_line
@@ -38,7 +38,7 @@ def rebuild_spider_file_line(line):
 
 def rebuild_spider_file(file_name):
     text = ""
-    with open(file_name, 'r') as f:
+    with open(file_name, mode='r', errors='ignore') as f:
         text = f.read()
     text = text.replace(r'\N', ' ')
     text = text.replace('\t', ' ')
@@ -113,7 +113,8 @@ def main():
         sys.exit()
     else:
         for file in dat_files:
-            rebuild_spider_file(file)
+            if not os.path.exists('rebuilt_' + file.replace('.dat', '.txt')):
+                    rebuild_spider_file(file)
     numbers_to_search_list = upload_number_list()           
     rebuilt_files = get_rebuild_files_list()
     for number in numbers_to_search_list:
