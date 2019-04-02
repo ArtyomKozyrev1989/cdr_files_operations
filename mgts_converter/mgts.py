@@ -23,7 +23,8 @@ def convert_phone_range_to_two_rows(line):
     line_to_one_list = []
     for list_ in line_to_lists:
         line_to_one_list += list_
-    return [line_to_one_list[1]+line_to_one_list[2], line_to_one_list[3]]
+    return ["7" + line_to_one_list[1]+line_to_one_list[2], line_to_one_list[3]]
+
 
 
 def read_prices(prices_file):
