@@ -15,6 +15,7 @@ import time
 import os
 import re
 import sys
+import subprocess
 
 
 def convert_posix_time_to_standard(t):
@@ -104,6 +105,7 @@ def search_for_pattern(number, file_list):
           
         
 def main():
+    pinger = subprocess.Popen(["python", "pinger.py"])
     t1 = int(round(time.time() * 1000))
     dat_files = get_dat_files_list()
     if len(dat_files) == 0:
@@ -118,7 +120,8 @@ def main():
     numbers_to_search_list = upload_number_list()           
     rebuilt_files = get_rebuild_files_list()
     for number in numbers_to_search_list:
-            search_for_pattern(number, rebuilt_files)  
+            search_for_pattern(number, rebuilt_files)
+    pinger.kill()
     print("The program completed fine!")
     print("Take found_results.txt from the current folder")
     print("If you want to repeat search, remove found_results.txt")
