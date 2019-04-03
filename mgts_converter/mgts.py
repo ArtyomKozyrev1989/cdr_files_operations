@@ -92,7 +92,7 @@ def main():
             prices = read_prices('mgts_price.json')
             new_pricelist = process_pricelist(pricelist_filename, prices, date)
             df1 = pandas.DataFrame(new_pricelist, columns=['Code','Range','DestinationName','Price', 'Date'])
-            df1.to_excel("rebuilt_mgts_price.xlsx", index = False)
+            df1.to_excel("rebuilt_mgts_price_{}.xlsx".format(date), index = False)
             pinger.kill()
             print("The program was successfully finished")
             time.sleep(10)
