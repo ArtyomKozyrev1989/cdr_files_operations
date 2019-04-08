@@ -76,33 +76,6 @@ def process_pricelist(pricelist_file, prices, date):
                 excel_lines.append(line)
     return excel_lines
 
-
-def main():
-    if os.path.exists('rostelecom_price.json'):
-        print('The following list of files in folder:')
-        files_cwd = get_files_names_cwd()
-        for number, name in files_cwd.items():
-            print('{} : {}'.format(number, name))
-        while True:
-            pricelist_filename_number = input('Please choose Rostelecom pticelist number: ').strip()
-            if pricelist_filename_number in files_cwd.keys():
-                pricelist_filename = files_cwd[pricelist_filename_number]
-                break
-            else:
-                print("Incorrect Input. Try again")
-        date = ask_date()
-        #pinger = subprocess.Popen(["python", "pinger.py"])
-        prices = read_prices('rostelecom_price.json')
-        new_pricelist = process_pricelist(pricelist_filename, prices, date)
-        df1 = pandas.DataFrame(new_pricelist, columns=['Code','Range','DestinationName','Price', 'Date'])
-        df1.to_excel("rebuilt_rostelecom_price_{}.xlsx".format(date), index = False)
-        #pinger.kill()
-        print("The program was successfully finished")
-        time.sleep(10)
-    else:
-        print('There is no rostelecom_price.json in the folder. Create the file.')
-        time.sleep(10)
-
         
 def main():
     try:
