@@ -95,7 +95,8 @@ def main():
         data = pd.read_excel(pricelist_filename)
         data.columns =  ['TempCode', 'TempRange1', 'TempRange2', 'CallsNumber', 'TempCarrier']
         data['Code'] = data.apply(lambda x: "7{}".format(x['TempCode']), axis=1)
-        data['Range'] = data.apply(lambda x: "{}-{}".format(x['TempRange1'], x['TempRange2']), axis=1)
+        data['Range'] = data.apply(
+            lambda x: "{}-{}".format(str(x['TempRange1']).rjust(7, '0'), str(x['TempRange2']).rjust(7, '0')), axis=1)
         data['DestinationName'] = data.apply(change_destinations_names, axis=1)
         data['Price'] = data.apply(create_prices_column, axis=1, args=(prices,),)
         data['Date'] = data.apply(create_price_column, axis=1, args=(date,),)
